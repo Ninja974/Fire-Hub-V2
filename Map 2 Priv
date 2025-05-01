@@ -1,3 +1,4 @@
+getgenv().getrenv = nil
 --Map 2 Priv
 repeat task.wait() until game:IsLoaded()
 local Library = loadstring(game:HttpGetAsync("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
@@ -24,6 +25,12 @@ local distance = 15
 
 -- DUMP
 local places = require(game:GetService("ReplicatedStorage").Modules.Global.Map_Locaations)
+local dummies = {
+    "Dummy (Infinite Hp)",
+    "Dummy (10000 Hp)",
+}
+
+
 local bosses = {}
 for i, v in workspace.Mobs.Bosses:GetDescendants() do
     if v:IsA("Configuration") and v:FindFirstChild("Npc_Configuration") then
@@ -57,6 +64,7 @@ local tweento = function(coords:CFrame)
     tween:Play()
     return tween
 end
+
 
 function tpto(p1)
     pcall(function()
@@ -101,6 +109,14 @@ local function findBoss(name, hrp)
             end
         end
     end
+end
+local function findDummy(name)
+    for i, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and v.Name == name and v:FindFirstChild("HumanoidRootPart") then
+            return v
+        end
+    end
+    return nil
 end
 
 local function findMob(hrp)
@@ -278,7 +294,48 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
         end
 	end    
 })
+Tabs["Auto Farm"]:AddToggle("tAutoDummy", {
+    Title = "Auto Dummy (Need to be close to dummy)",
+    Default = false,
+    Callback = function(Value)
+        local _conn
+        local antifall
 
+        if Value then
+            _conn = RunService.Stepped:Connect(noclip)
+            antifall = Instance.new("BodyVelocity")
+            antifall.Velocity = Vector3.new(0, 0, 0)
+            antifall.Parent = client.Character.HumanoidRootPart
+
+            task.spawn(function()
+                while options.tAutoDummy.Value do
+                    for _, dummyName in ipairs(dummies) do
+                        if not options.tAutoDummy.Value then break end
+
+                        local dummy = findDummy(dummyName)
+                        if dummy and dummy:FindFirstChild("HumanoidRootPart") then
+                            print("Tweening to:", dummyName)
+                            tweento(dummy.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)).Completed:Wait()
+                            task.wait(3)  -- ajustá este tiempo para más o menos permanencia por dummy
+                        end
+                    end
+                    task.wait()
+                end
+                if _conn then _conn:Disconnect() end
+                if antifall then antifall:Destroy() end
+            end)
+        else
+            if _conn then _conn:Disconnect() end
+            if antifall then antifall:Destroy() end
+        end
+    end
+})
+
+
+
+
+	    
+	    
 Tabs["Auto Farm"]:AddToggle("tAutoM1", {
 	Title = "Weapon KillAura",
 	Default = false,
@@ -468,6 +525,60 @@ task.spawn(function()
         task.wait()
     end
 end)
+
+Tabs["Kill Auras"]:AddToggle("tDummyM1", {
+    Title = 'Dummy M1 Aura(Priv Server Only)',
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            task.spawn(function()
+                while options.tDummyM1.Value do 
+                    local targetDummy = nil
+                    for _, dummyName in ipairs(dummies) do
+                        local dummy = findDummy(dummyName)
+                        if dummy and dummy:FindFirstChild("HumanoidRootPart") then
+                            targetDummy = dummy
+                            break
+                        end
+                    end
+
+                    if targetDummy then
+                        -- Mandamos ráfaga de 8 golpes, como en AutoM1
+                        for i = 1, 8 do
+                            Handle_Initiate_S:FireServer(
+                                weapons[options.dWeaponSelect.Value],
+                                client,
+                                client.Character,
+                                targetDummy.HumanoidRootPart,
+                                targetDummy.Humanoid,
+                                919
+                            )
+                            Handle_Initiate_S:FireServer(
+                                weapons[options.dWeaponSelect.Value],
+                                client,
+                                client.Character,
+                                targetDummy.HumanoidRootPart,
+                                targetDummy.Humanoid,
+                                math.huge
+                            )
+                        end
+                    end
+
+                    task.wait(1)  -- pausa mínima entre ráfagas
+                    repeat task.wait() until client.combotangasd123.Value == 0 and not playerValues:FindFirstChild("Stun")
+                end
+            end)
+        end
+    end
+})
+
+
+
+
+
+
+
+
 
 -- MISC
 
