@@ -28,6 +28,7 @@ local places = require(game:GetService("ReplicatedStorage").Modules.Global.Map_L
 local dummies = {
     "Dummy (Infinite Hp)",
     "Dummy (10000 Hp)",
+    "Dummy (5000 Hp),"
 }
 
 
@@ -525,6 +526,51 @@ task.spawn(function()
         task.wait()
     end
 end)
+Tabs["Kill Auras"]:AddToggle("tArrowKADummy", {
+    Title = 'Arrow KA (Dummies)',
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            task.spawn(function()
+                while options.tArrowKADummy.Value do 
+                    for _, dummyName in ipairs(dummies) do
+                        local dummy = findDummy(dummyName)
+                        if dummy and dummy:FindFirstChild("HumanoidRootPart") then
+                            local args = {
+                                [1] = "arrow_knock_back_damage",
+                                [2] = client.Character,
+                                [3] = dummy:GetModelCFrame(),
+                                [4] = dummy,
+                                [5] = math.huge,
+                                [6] = math.huge
+                            }
+
+                            Handle_Initiate_S:FireServer(unpack(args))
+                        end
+                        task.wait(0.2)  -- ajustá este tiempo si querés más lento/rápido
+                    end
+                end
+            end)
+        end
+    end
+})
+
+task.spawn(function()
+    while true do
+        if options.tArrowKADummy and options.tArrowKADummy.Value then
+            local args = {
+                [1] = "skil_ting_asd",
+                [2] = client,
+                [3] = "arrow_knock_back",
+                [4] = 5
+            }
+            Handle_Initiate_S_:InvokeServer(unpack(args))
+            task.wait(6)
+        end
+        task.wait()
+    end
+end)
+
 
 Tabs["Kill Auras"]:AddToggle("tDummyM1", {
     Title = 'Dummy M1 Aura(Priv Server Only)',
@@ -572,6 +618,46 @@ Tabs["Kill Auras"]:AddToggle("tDummyM1", {
     end
 })
 
+Tabs["Kill Auras"]:AddToggle("tAutoM1AllWeapons", {
+    Title = "Weapon KillAura (All Weapons)",
+    Default = false,
+    Callback = function(Value)
+        task.spawn(function()
+            if Value then
+                local weaponList = {}
+                for weaponName, weaponValue in pairs(weapons) do
+                    table.insert(weaponList, weaponValue)
+                end
+                local weaponIndex = 1
+
+                while options.tAutoM1AllWeapons.Value do
+                    if not options["tGodMode"].Value then distance = 7 end
+                    task.wait(0.1)
+
+                    -- Elegimos arma actual
+                    local currentWeapon = weaponList[weaponIndex]
+
+                    -- Mandamos ráfaga solo con esa arma
+                    for i = 1, 8 do
+                        Handle_Initiate_S:FireServer(currentWeapon, client, client.Character, client.Character.HumanoidRootPart, client.Character.Humanoid, 919)
+                        Handle_Initiate_S:FireServer(currentWeapon, client, client.Character, client.Character.HumanoidRootPart, client.Character.Humanoid, math.huge)
+                        task.wait(0.1)
+                    end
+
+                    -- Rotamos a la siguiente arma
+                    weaponIndex = weaponIndex + 1
+                    if weaponIndex > #weaponList then
+                        weaponIndex = 1
+                    end
+
+                    if not options["tGodMode"].Value then distance = 15 end
+                    task.wait(1)
+                    repeat task.wait() until client.combotangasd123.Value == 0 and not playerValues:FindFirstChild("Stun")
+                end
+            end
+        end)
+    end
+})
 
 
 
