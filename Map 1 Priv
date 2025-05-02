@@ -1,3 +1,4 @@
+
 --Map 1 Priv
 getgenv().getrenv = nil
 repeat task.wait() until game:IsLoaded()
@@ -541,7 +542,7 @@ Tabs["Kill Auras"]:AddToggle("tBringPlayer", {
                                 [3] = player.Character:GetModelCFrame()
                             }
                             Handle_Initiate_S:FireServer(unpack(args))
-                            task.wait(0.2)  -- ajustá este delay si querés
+                            task.wait(0.2)
                         end
                     end
                     task.wait()
@@ -566,6 +567,7 @@ task.spawn(function()
         task.wait()
     end
 end)
+
 
 Tabs["Kill Auras"]:AddToggle("tArrowKAOPNPC", {
     Title = 'Arrow KA (Farming The Greatest)',
