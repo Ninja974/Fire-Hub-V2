@@ -23,6 +23,11 @@ local distance = 15
 
 -- DUMP
 local places = require(game:GetService("ReplicatedStorage").Modules.Global.Map_Locaations)
+local dummies = {
+    "OP_NPC",
+    }
+   
+
 local bosses = {}
 for i, v in workspace.Mobs.Bosses:GetDescendants() do
     if v:IsA("Configuration") and v:FindFirstChild("Npc_Configuration") then
@@ -271,6 +276,43 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
         end
 	end    
 })
+Tabs["Auto Farm"]:AddToggle("tAutoOPNPC", {
+    Title = "Auto OP_NPC (Tween to OP_NPCs)",
+    Default = false,
+    Callback = function(Value)
+        local _conn
+        local antifall
+
+        if Value then
+            _conn = RunService.Stepped:Connect(noclip)
+            antifall = Instance.new("BodyVelocity")
+            antifall.Velocity = Vector3.new(0, 0, 0)
+            antifall.Parent = client.Character.HumanoidRootPart
+
+            task.spawn(function()
+                while options.tAutoOPNPC.Value do
+                    for _, npc in pairs(workspace:GetDescendants()) do
+                        if not options.tAutoOPNPC.Value then break end
+
+                        if npc:IsA("Model") and npc.Name == "OP_NPC" and npc:FindFirstChild("HumanoidRootPart") then
+                            print("Tweening to OP_NPC at:", npc:GetFullName())
+                            local tween = tweento(npc.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0))
+                            tween.Completed:Wait()
+
+                            task.wait(3)  -- ajustá este tiempo si querés quedarte más o menos en cada uno
+                        end
+                    end
+                    task.wait()
+                end
+                if _conn then _conn:Disconnect() end
+                if antifall then antifall:Destroy() end
+            end)
+        else
+            if _conn then _conn:Disconnect() end
+            if antifall then antifall:Destroy() end
+        end
+    end
+})
 
 Tabs["Auto Farm"]:AddToggle("tAutoM1", {
 	Title = "Weapon KillAura",
@@ -468,6 +510,51 @@ task.spawn(function()
         task.wait()
     end
 end)
+
+Tabs["Kill Auras"]:AddToggle("tArrowKAOPNPC", {
+    Title = 'Arrow KA (Farming The Greatest)',
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            task.spawn(function()
+                while options.tArrowKAOPNPC.Value do 
+                    for _, npc in pairs(workspace:GetDescendants()) do
+                        if npc:IsA("Model") and npc.Name == "OP_NPC" and npc:FindFirstChild("HumanoidRootPart") then
+                            local args = {
+                                [1] = "arrow_knock_back_damage",
+                                [2] = client.Character,
+                                [3] = npc:GetModelCFrame(),
+                                [4] = npc,
+                                [5] = math.huge,
+                                [6] = math.huge
+                            }
+
+                            Handle_Initiate_S:FireServer(unpack(args))
+                            task.wait(0.2)  -- ajustá este tiempo si querés más lento/rápido
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+task.spawn(function()
+    while true do
+        if options.tArrowKAOPNPC and options.tArrowKAOPNPC.Value then
+            local args = {
+                [1] = "skil_ting_asd",
+                [2] = client,
+                [3] = "arrow_knock_back",
+                [4] = 5
+            }
+            Handle_Initiate_S_:InvokeServer(unpack(args))
+            task.wait(6)
+        end
+        task.wait()
+    end
+end)
+
 
 --[[
 
