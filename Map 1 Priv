@@ -563,6 +563,19 @@ task.spawn(function()
     end
 end)
 
+Tabs["Kill Auras"]:AddSlider("sM1HitsPerWeapon", {
+    Title = "Hits Per Weapon (Auto M1 All)",
+    Description = "Number of hits per weapon in the M1 All Weapons",
+    Default = 8,
+    Min = 1,
+    Max = 20,
+    Rounding = 0,
+    Callback = function(Value)
+        -- Simplemente actualiza el valor; se leerá dentro del loop
+    end
+})
+
+-- Script principal
 Tabs["Kill Auras"]:AddToggle("tAutoM1AllWeapons", {
     Title = "Weapon KillAura (All Weapons)",
     Default = false,
@@ -581,9 +594,10 @@ Tabs["Kill Auras"]:AddToggle("tAutoM1AllWeapons", {
 
                     -- Elegimos arma actual
                     local currentWeapon = weaponList[weaponIndex]
+                    local hits = options.sM1HitsPerWeapon.Value  -- obtenemos el valor del slider
 
-                    -- Mandamos ráfaga solo con esa arma
-                    for i = 1, 8 do
+                    -- Mandamos ráfaga con esa arma
+                    for i = 1, hits do
                         Handle_Initiate_S:FireServer(currentWeapon, client, client.Character, client.Character.HumanoidRootPart, client.Character.Humanoid, 919)
                         Handle_Initiate_S:FireServer(currentWeapon, client, client.Character, client.Character.HumanoidRootPart, client.Character.Humanoid, math.huge)
                         task.wait(0.1)
