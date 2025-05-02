@@ -621,7 +621,7 @@ Tabs["Kill Auras"]:AddToggle("tDummyM1", {
 -- Agregamos el slider al tab
 Tabs["Kill Auras"]:AddSlider("sM1HitsPerWeapon", {
     Title = "Hits Per Weapon (Auto M1 All)",
-    Description = "Number of hits per weapon in the M1 All Weapons loop",
+    Description = "Number of hits per weapon in the M1 All Weapons",
     Default = 8,
     Min = 1,
     Max = 20,
