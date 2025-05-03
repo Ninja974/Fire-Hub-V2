@@ -876,6 +876,28 @@ Tabs["Buffs"]:AddToggle("tWarDrum", {
 })
 options["tWarDrum"]:SetValue(true)
 
+Tabs["Buffs"]:AddToggle("theartabl", {
+	Title = "Heart Ablaze (Only Human)",
+	Default = false,
+	Callback = function(Value)
+        game:GetService("ReplicatedStorage").Remotes.heart_ablaze_mode_remote:FireServer(true)
+        else
+           game:GetService("ReplicatedStorage").Remotes.heart_ablaze_mode_remote:FireServer(false)
+        end
+    end
+    })
+
+Tabs["Buffs"]:AddToggle("tgodspeed", {
+	Title = "GodSpeed (Only Human)",
+	Default = false,
+	Callback = function(Value)
+	       game:GetService("ReplicatedStorage").Remotes.thundertang123:FireServer(true)
+        else
+            game:GetService("ReplicatedStorage").Remotes.thundertang123:FireServer(false)
+        end
+    end
+    })
+
 Tabs["Buffs"]:AddToggle("tSunImm", {
     Title = "Sun Immunity",
     Default = true,
