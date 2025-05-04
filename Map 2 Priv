@@ -289,6 +289,20 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
             if options["tAutoFlower"] then
                 options["tAutoFlower"]:SetValue(false)
             end
+
+            -- Anti-AFK setup
+            local antiAFKRunning = true
+            task.spawn(function()
+                local hrp = client.Character:WaitForChild("HumanoidRootPart")
+                while antiAFKRunning and options.tAutoBoss.Value do
+                    hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, 0.1)
+                    task.wait(1)
+                    hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -0.1)
+                    task.wait(10)
+                end
+            end)
+
+            -- Auto Boss loop
             task.spawn(function()
                 local _conn = RunService.Stepped:Connect(noclip)
                 local antifall = Instance.new("BodyVelocity")
@@ -323,12 +337,15 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
                     task.wait()
                 end
 
+                -- Cleanup when toggle turns off
+                antiAFKRunning = false
                 _conn:Disconnect()
                 antifall:Destroy()
             end)
         end
     end
 })
+
 
 
 Tabs["Auto Farm"]:AddToggle("tAutoDummy", {
