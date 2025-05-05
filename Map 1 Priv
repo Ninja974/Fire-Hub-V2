@@ -864,7 +864,8 @@ task.spawn(function()
     end
 end)
 
-Tabs["Player Farm"]:AddToggle("tBringPlayer", {
+ -- NORMAL bring all players
+Tabs["Player Farm"]:AddToggle("tBringPlayerNormal", {
     Title = 'Arrow Bring All Players',
     Default = false,
     Callback = function(Value)
@@ -877,7 +878,7 @@ Tabs["Player Farm"]:AddToggle("tBringPlayer", {
                 })
             end
             task.spawn(function()
-                while options.tBringPlayer.Value do 
+                while options.tBringPlayerNormal.Value do 
                     for _, player in pairs(game.Players:GetPlayers()) do
                         if player ~= client and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                             local args = {
@@ -896,64 +897,78 @@ Tabs["Player Farm"]:AddToggle("tBringPlayer", {
     end
 })
 
-task.spawn(function()
-    while true do
-        if options.tBringPlayer and options.tBringPlayer.Value then
-            local args = {
-                [1] = "skil_ting_asd",
-                [2] = client,
-                [3] = "arrow_knock_back",
-                [4] = 5
-            }
-            Handle_Initiate_S_:InvokeServer(unpack(args))
-            task.wait(6)
-        end
-        task.wait()
-    end
-end)
-
-task.spawn(function()
-    while true do
-        if options.tMultiPlayerKA and options.tMultiPlayerKA.Value then
-            local args = {
-                [1] = "skil_ting_asd",
-                [2] = client,
-                [3] = "arrow_knock_back",
-                [4] = 5
-            }
-            Handle_Initiate_S_:InvokeServer(unpack(args))
-            task.wait(6)
-        end
-        task.wait()
-    end
-end)
-
-if getrenv then
-    local tang = game:GetService("Players").LocalPlayer.PlayerGui.MainGuis.Settings.Scroll.KeybindsHolder
-    local skill = getrenv()._G.skills_modules_thing
-    local skells = client.PlayerGui.Power_Adder
-    for i = 1, 6 do
-        Tabs["Misc"]:AddToggle(`tMove{i}`, {
-            Title = `Auto Skill {tang:WaitForChild("Move"..i).Buttons.txt.txt.Text}`;
-            Default = false;
-            Callback = function(Value)
-                if Value then
-                    task.spawn(function()
-                        local art = (playerData.Race.Value == 3 and playerData.Demon_Art.Value) or ((playerData.Race.Value == 1) or (playerData.Race.Value == 2) and playerData.Power.Value)
-                        while options[`tMove{i}`].Value do
-                            local skill_config = skells[art]["Skills"]:GetChildren()[i]
-                            Handle_Initiate_S:FireServer("skil_ting_asd", client, skill_config["Actual_Skill_Name"].Value, 5)                        
-                            skill[skill_config["Actual_Skill_Name"].Value]["Down"](skill_config)
-                            task.wait(0.1)
-                            skill[skill_config["Actual_Skill_Name"].Value]["Up"](skill_config)
-                            task.wait(skill_config["CoolDown"].Value + 1)
-                        end
-                    end)
-                end
+-- MAX DISTANCE bring all players
+Tabs["Player Farm"]:AddToggle("tBringPlayerMax", {
+    Title = 'Arrow Bring All Players (Max Distance)',
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if options["tArrowKA"].Value then
+                Library:Notify({
+                    Title = "Attention",
+                    Content = "You are susceptible to get kicked if you use two different KA",
+                    Duration = 5
+                })
             end
-        })
+            task.spawn(function()
+                while options.tBringPlayerMax.Value do 
+                    for _, player in pairs(game.Players:GetPlayers()) do
+                        if player ~= client and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                            -- Fire damage event targeting them no matter the distance
+                            local argsDamage = {
+                                [1] = "piercing_arrow_damage",
+                                [2] = client,
+                                [3] = player.Character:GetModelCFrame()
+                            }
+                            Handle_Initiate_S:FireServer(unpack(argsDamage))
+
+                            -- Fire knockback/pull effect if the server supports it
+                            local argsKnockback = {
+                                [1] = "arrow_knock_back",
+                                [2] = client,
+                                [3] = player.Character.HumanoidRootPart.Position,
+                                [4] = 5 -- adjust force if needed
+                            }
+                            Handle_Initiate_S_:InvokeServer(unpack(argsKnockback))
+
+                            task.wait(0.1)
+                        end
+                    end
+                    task.wait(0.05)
+                end
+            end)
+        end
     end
-end
+})
+
+-- BACKGROUND spam loop (only tied to max toggle if needed)
+task.spawn(function()
+    while true do
+        if options.tBringPlayerNormal and options.tBringPlayerNormal.Value then
+            local args = {
+                [1] = "skil_ting_asd",
+                [2] = client,
+                [3] = "arrow_knock_back",
+                [4] = 5
+            }
+            Handle_Initiate_S_:InvokeServer(unpack(args))
+            task.wait(6)
+        end
+        if options.tBringPlayerMax and options.tBringPlayerMax.Value then
+            local args = {
+                [1] = "skil_ting_asd",
+                [2] = client,
+                [3] = "arrow_knock_back",
+                [4] = 5
+            }
+            Handle_Initiate_S_:InvokeServer(unpack(args))
+            task.wait(6)
+        end
+        task.wait(0.5)
+    end
+end)
+
+
 
 --Misc
 Tabs["Misc"]:AddToggle("tAutoSoul", {
@@ -1290,7 +1305,7 @@ Tabs["Buffs"]:AddToggle("tWarDrum", {
         end
     end
 })
-options["tWarDrum"]:SetValue(true)
+options["tWarDrum"]:SetValue(false)
 
 Tabs["Buffs"]:AddToggle("theartabl", {
     Title = "Heart Ablaze (Only Human)",
