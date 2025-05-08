@@ -1392,7 +1392,29 @@ Tabs["Buffs"]:AddToggle("tSunImm", {
     end
 })
 
+Tabs["Buffs"]:AddToggle("tInfStam", {
+	Title = "Infinite Stamina",
+	Default = true,
+	Callback = function(Value)
+	if Value then
+           game:GetService("ReplicatedStorage").PlayerValues[game.Players.LocalPlayer.Name].Stamina.MinValue = game:GetService("ReplicatedStorage").PlayerValues[game.Players.LocalPlayer.Name].Stamina.MaxValue
+        else
+           game:GetService("ReplicatedStorage").PlayerValues[game.Players.LocalPlayer.Name].Stamina.MinValue = 0 
+        end
+    end
+    })
 
+Tabs["Buffs"]:AddToggle("tInfBreath", {
+	Title = "Infinite Breathing",
+	Default = true,
+	Callback = function(Value)
+	if Value then
+           game:GetService("ReplicatedStorage").PlayerValues[game.Players.LocalPlayer.Name].Breath.MinValue = game:GetService("ReplicatedStorage").PlayerValues[game.Players.LocalPlayer.Name].Breath.MaxValue
+        else
+           game:GetService("ReplicatedStorage").PlayerValues[game.Players.LocalPlayer.Name].Breath.MinValue = 0 
+        end
+    end
+    })
 Tabs["Webhook Settings"]:AddInput("iWebhook", {
     Title = "Webhook",
     Default = nil,
