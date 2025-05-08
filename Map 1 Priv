@@ -269,6 +269,27 @@ Tabs["Auto Farm"]:AddDropdown("dFarmPosition", {
         getgenv().FarmPosition = Value  -- guardamos en una variable global para usar después
     end
 })
+-- First, create the boss dropdown
+local bossNames = {}
+for bossName, _ in pairs(bosses) do
+    table.insert(bossNames, bossName)
+end
+
+Tabs["Auto Farm"]:AddDropdown("dBossSelect", {
+    Title = "Select Boss",
+    Values = bossNames,
+    Default = bossNames[1],
+    Multi = false,
+    Callback = function(Value)
+        Library:Notify({
+            Title = "Boss Selected",
+            Content = "Now targeting: " .. Value,
+            Duration = 3
+        })
+    end
+})
+
+-- Then the toggle for selected boss
 Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
     Title = "Auto Boss",
     Default = false,
@@ -278,7 +299,7 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
                 options["tAutoFlower"]:SetValue(false)
             end
 
-            -- Anti-AFK setup
+            -- Anti-AFK
             local antiAFKRunning = true
             task.spawn(function()
                 local hrp = client.Character:WaitForChild("HumanoidRootPart")
@@ -290,7 +311,7 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
                 end
             end)
 
-            -- Auto Boss loop
+            -- Loop targeting selected boss
             task.spawn(function()
                 local _conn = RunService.Stepped:Connect(noclip)
                 local antifall = Instance.new("BodyVelocity")
@@ -298,11 +319,11 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
                 antifall.Parent = client.Character.HumanoidRootPart
 
                 while options.tAutoBoss.Value do
-                    for boss, coord in bosses do
-                        if not options.tAutoBoss.Value then break end
-
+                    local selectedBoss = options.dBossSelect.Value
+                    local coord = bosses[selectedBoss]
+                    if coord then
                         tweento(CFrame.new(coord) * CFrame.new(0, 3, 0)).Completed:Wait()
-                        local boboss = findBoss(boss, true)
+                        local boboss = findBoss(selectedBoss, true)
 
                         if boboss and boboss:FindFirstChild("Humanoid") and options.tAutoBoss.Value then
                             while boboss.Humanoid.Health > 0 and options.tAutoBoss.Value do
@@ -314,7 +335,81 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
                                 elseif FarmPosition == "Below" then
                                     offset = CFrame.new(0, -distance, 0)
                                 else
-                                    offset = CFrame.new(0, distance, 0) -- default
+                                    offset = CFrame.new(0, distance, 0)
+                                end
+
+                                tpto(boboss.HumanoidRootPart.CFrame * offset * CFrame.Angles(math.rad(-90), 0, 0))
+                                task.wait(0.1)
+                            end
+                        else
+                            Library:Notify({
+                                Title = "Boss Not Found",
+                                Content = "Couldn't find boss: " .. selectedBoss,
+                                Duration = 3
+                            })
+                        end
+                    else
+                        Library:Notify({
+                            Title = "Invalid Boss",
+                            Content = "Selected boss has no coordinate.",
+                            Duration = 3
+                        })
+                    end
+                    task.wait(1)
+                end
+
+                antiAFKRunning = false
+                _conn:Disconnect()
+                antifall:Destroy()
+            end)
+        end
+    end
+})
+-- ADDITIONAL: toggle for farming ALL bosses
+Tabs["Auto Farm"]:AddToggle("tAutoBossAll", {
+    Title = "Auto Boss (All)",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            if options["tAutoFlower"] then
+                options["tAutoFlower"]:SetValue(false)
+            end
+
+            local antiAFKRunning = true
+            task.spawn(function()
+                local hrp = client.Character:WaitForChild("HumanoidRootPart")
+                while antiAFKRunning and options.tAutoBossAll.Value do
+                    hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, 0.1)
+                    task.wait(1)
+                    hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -0.1)
+                    task.wait(10)
+                end
+            end)
+
+            task.spawn(function()
+                local _conn = RunService.Stepped:Connect(noclip)
+                local antifall = Instance.new("BodyVelocity")
+                antifall.Velocity = Vector3.new(0, 0, 0)
+                antifall.Parent = client.Character.HumanoidRootPart
+
+                while options.tAutoBossAll.Value do
+                    for boss, coord in pairs(bosses) do
+                        if not options.tAutoBossAll.Value then break end
+
+                        tweento(CFrame.new(coord) * CFrame.new(0, 3, 0)).Completed:Wait()
+                        local boboss = findBoss(boss, true)
+
+                        if boboss and boboss:FindFirstChild("Humanoid") and options.tAutoBossAll.Value then
+                            while boboss.Humanoid.Health > 0 and options.tAutoBossAll.Value do
+                                local offset
+                                if FarmPosition == "Above" then
+                                    offset = CFrame.new(0, distance, 0)
+                                elseif FarmPosition == "Behind" then
+                                    offset = CFrame.new(0, 0, -distance)
+                                elseif FarmPosition == "Below" then
+                                    offset = CFrame.new(0, -distance, 0)
+                                else
+                                    offset = CFrame.new(0, distance, 0)
                                 end
 
                                 tpto(boboss.HumanoidRootPart.CFrame * offset * CFrame.Angles(math.rad(-90), 0, 0))
@@ -322,10 +417,9 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
                             end
                         end
                     end
-                    task.wait()
+                    task.wait(1)
                 end
 
-                -- Cleanup when toggle turns off
                 antiAFKRunning = false
                 _conn:Disconnect()
                 antifall:Destroy()
@@ -334,49 +428,8 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
     end
 })
 
-Tabs["Auto Farm"]:AddToggle("tAutoOPNPC", {
-    Title = "Auto Move OP_Npc (need to be close)",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            task.spawn(function()
-                local _conn = RunService.Stepped:Connect(noclip)
-                local antifall = Instance.new("BodyVelocity")
-                antifall.Velocity = Vector3.new(0, 0, 0)
-                antifall.Parent = client.Character.HumanoidRootPart
 
-                while options.tAutoOPNPC.Value do
-                    for _, npc in pairs(workspace:GetDescendants()) do
-                        if npc:IsA("Model") and npc.Name == "OP_NPC" and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("HumanoidRootPart") then
-                            local targetPos = npc.HumanoidRootPart.Position
-                            local currentPos = client.Character.HumanoidRootPart.Position
-                            local distanceTo = (targetPos - currentPos).Magnitude
 
-                            if distanceTo > 700 then
-                                -- Muy lejos → teleporteamos
-                                print("Teleporting to far OP_NPC:", npc:GetFullName())
-                                tpto(npc.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0))
-                            else
-                                -- Cerca → usamos tween suave
-                                print("Tweening to OP_NPC:", npc:GetFullName())
-                                tweento(npc.HumanoidRootPart.CFrame * CFrame.new(0, 3, 0)).Completed:Wait()
-                            end
-
-                            while npc.Humanoid.Health > 0 and options.tAutoOPNPC.Value do
-                                tpto(npc.HumanoidRootPart.CFrame * CFrame.new(0, distance, 0) * CFrame.Angles(math.rad(-90), 0, 0))
-                                task.wait()
-                            end
-                        end
-                    end
-                    task.wait()
-                end
-
-                _conn:Disconnect()
-                antifall:Destroy()
-            end)
-        end
-    end
-})
 
 
 Tabs["Auto Farm"]:AddToggle("tAutoM1", {
