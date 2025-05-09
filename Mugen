@@ -326,7 +326,7 @@ local arrowKADelay = 0.2
 Tabs["Kill Auras"]:AddSlider("sArrowKADelay", {
     Title = "Arrow KA Delay",
     Description = "Delay between each Arrow KA hit",
-    Default = 0.2,
+    Default = 0.36,
     Min = 0.1,
     Max = 2,
     Rounding = 2,
