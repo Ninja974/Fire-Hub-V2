@@ -369,7 +369,21 @@ Tabs["Kill Auras"]:AddToggle("tArrowKA", {
         end
     end
 })
-
+task.spawn(function()
+    while true do
+        if options.tBringMob.Value or options.tArrowKA.Value then
+            local args = {
+                [1] = "skil_ting_asd",
+                [2] = client,
+                [3] = "arrow_knock_back",
+                [4] = 5
+            }
+            Handle_Initiate_S_:InvokeServer(unpack(args))
+            task.wait(6)
+        end
+        task.wait()
+    end
+end)
 
 Tabs["Kill Auras"]:AddToggle("tBringMob", {
     Title = 'Arrow Bring Mob',
