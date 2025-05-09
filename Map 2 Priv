@@ -1,4 +1,4 @@
-getgenv().getrenv = nil
+
 --Map 2 Priv
 repeat task.wait() until game:IsLoaded()
 local Library = loadstring(game:HttpGetAsync("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
