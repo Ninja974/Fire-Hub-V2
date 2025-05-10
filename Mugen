@@ -357,8 +357,8 @@ Tabs["Kill Auras"]:AddToggle("tArrowKA", {
                             [2] = client.Character,
                             [3] = target:GetModelCFrame(),
                             [4] = target,
-                            [5] = 400,
-                            [6] = 400
+                            [5] = 200,
+                            [6] = 200
                         }
 
                         Handle_Initiate_S:FireServer(unpack(args))
