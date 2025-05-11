@@ -1268,7 +1268,15 @@ Tabs["Misc"]:AddToggle("tAutoSoul", {
     end
 })
 
+Tabs["Misc"]:AddButton({
+    Title = "Spin Ur BDA"
+    Callback = function()
+        local args = {
+	"check_can_spin_demon_art"
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S_"):InvokeServer(unpack(args))
 
+})
 -- BUFFS
 
 local skillMod = require(game:GetService("ReplicatedStorage").Modules.Server.Skills_Modules_Handler).Skills
