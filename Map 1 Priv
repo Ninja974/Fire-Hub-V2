@@ -1282,7 +1282,15 @@ Tabs["Misc"]:AddButton({
         _conn:Disconnect()
     end
 })
+Tabs["Misc"]:AddButton({
+    Title = "Spin Ur BDA"
+    Callback = function()
+        local args = {
+	"check_can_spin_demon_art"
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S_"):InvokeServer(unpack(args))
 
+})
 
 -- QUESTS
 
@@ -1637,3 +1645,4 @@ Tabs["Settings"]:AddToggle("tAutoExec", {
 SaveManager:LoadAutoloadConfig()
 
 Window:SelectTab(1)
+
