@@ -236,7 +236,7 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
                             tweento(targetCFrame * maxDistanceOffset * maxDistanceAngle).Completed:Wait()
 
                             if model and model:FindFirstChild("Humanoid") then
-                                while model.Humanoid.Health > 0 and options.tAutoBoss.Value do
+                                while model.Humanoid.Health > 0 and options.tAutoBossMax.Value do
                                     -- Stay at max distance while attacking
                                     tpto(model.HumanoidRootPart.CFrame * maxDistanceOffset * maxDistanceAngle)
                                     task.wait()
