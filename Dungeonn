@@ -161,21 +161,21 @@ Tabs["Auto Farm"]:AddSlider("sTweenSpeed", {
     Callback = function(Value)
     end
 })
-Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
-	Title = "Auto Tp To Mobs",
-	Description = "Very Important to enable even with arrow ka",
+Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
+	Title = "Auto Tp To Mobs (Max Distance)",
+	Description = "Farms mobs from max distance without getting close",
 	Default = false,
 	Callback = function(Value)
 		local _conn
 		if Value then
-			-- Evita conflicto con Max Distance
-			if options["tAutoBossMax"].Value then
+			-- Evita conflicto con Close
+			if options["tAutoBoss"].Value then
 				Library:Notify({
 					Title = "Warning",
 					Content = "Can't enable both Close and Max Distance at the same time!",
 					Duration = 5
 				})
-				options["tAutoBoss"]:SetValue(false)
+				options["tAutoBossMax"]:SetValue(false)
 				return
 			end
 
@@ -183,22 +183,23 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
 				_conn = RunService.Stepped:Connect(noclip)
 				local antifall = Instance.new("BodyVelocity")
 				antifall.Velocity = Vector3.new(0, 0, 0)
+				antifall.MaxForce = Vector3.new(1e5, 1e5, 1e5)
 				antifall.Parent = client.Character.HumanoidRootPart
 
-				while options.tAutoBoss.Value do
+				while options.tAutoBossMax.Value do
 					for i, v in workspace.Mobs:GetChildren() do
 						if not v:FindFirstChildWhichIsA("Model") then
 							pcall(function()
 								tweento(
 									CFrame.new(v:WaitForChild("Npc_Configuration", 1):WaitForChild("spawnlocaitonasd123", 1).Value)
-									* CFrame.new(0, options["tAutoM1"].Value and 10 or 25, 0)
+									* CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
 									* CFrame.Angles(math.rad(-90), 0, 0)
 								).Completed:Wait()
 							end)
 						else
 							tweento(
 								v:FindFirstChildWhichIsA("Model"):GetModelCFrame()
-								* CFrame.new(0, options["tAutoM1"].Value and 10 or 25, 0)
+								* CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
 								* CFrame.Angles(math.rad(-90), 0, 0)
 							).Completed:Wait()
 						end
@@ -207,9 +208,9 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
 						if options["tAutoM1"].Value then
 							while model and model:FindFirstChild("Humanoid")
 								and model.Humanoid.Health > 0
-								and options.tAutoBoss.Value do
+								and options.tAutoBossMax.Value do
 
-								tpto(model.HumanoidRootPart.CFrame * CFrame.new(0, distance, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+								tpto(model.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0) * CFrame.Angles(math.rad(-90), 0, 0))
 								task.wait()
 							end
 						end
@@ -223,6 +224,7 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
 		end
 	end    
 })
+
 
 Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 	Title = "Auto Tp To Mobs (Max Distance)",
