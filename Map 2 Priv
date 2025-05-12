@@ -1269,13 +1269,13 @@ Tabs["Misc"]:AddToggle("tAutoSoul", {
 })
 
 Tabs["Misc"]:AddButton({
-    Title = "Spin Ur BDA"
+    Title = "Spin Ur BDA",
     Callback = function()
         local args = {
-	"check_can_spin_demon_art"
-}
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S_"):InvokeServer(unpack(args))
-
+            "check_can_spin_demon_art"
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("To_Server"):WaitForChild("Handle_Initiate_S_"):InvokeServer(unpack(args))
+    end
 })
 -- BUFFS
 
@@ -1423,6 +1423,18 @@ Tabs["Buffs"]:AddToggle("tInfBreath", {
         end
     end
     })
+
+Tabs["Buffs"]:AddToggle("tslayerheal", {
+    Title = "Slayer Heal",
+    Default = false,
+    Callback = function(Value)
+    if Value then
+           game:GetService("ReplicatedStorage").Remotes.regeneration_breathing_remote:FireServer(true)
+        else
+           game:GetService("ReplicatedStorage").Remotes.regeneration_breathing_remote:FireServer(false)
+        end
+    end
+})
 Tabs["Webhook Settings"]:AddInput("iWebhook", {
     Title = "Webhook",
     Default = nil,
