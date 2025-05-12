@@ -231,7 +231,9 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 	Description = "Farms mobs from max distance without getting close",
 	Default = false,
 	Callback = function(Value)
+		local _conn
 		if Value then
+			-- Evita conflicto con Close
 			if options["tAutoBoss"].Value then
 				Library:Notify({
 					Title = "Warning",
@@ -243,13 +245,10 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 			end
 
 			task.spawn(function()
+				_conn = RunService.Stepped:Connect(noclip)
 				local antifall = Instance.new("BodyVelocity")
-				antifall.Name = "AntiFall"
 				antifall.Velocity = Vector3.new(0, 0, 0)
-				antifall.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-				antifall.Parent = client.Character:WaitForChild("HumanoidRootPart")
-
-				local conn = RunService.Stepped:Connect(noclip)
+				antifall.Parent = client.Character.HumanoidRootPart
 
 				while options.tAutoBossMax.Value do
 					for _, v in ipairs(workspace.Mobs:GetChildren()) do
@@ -269,14 +268,14 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 						end
 
 						if targetCFrame then
-							local offset = CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
-							local angle = CFrame.Angles(math.rad(-90), 0, 0)
+							local maxDistanceOffset = CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
+							local maxDistanceAngle = CFrame.Angles(math.rad(-90), 0, 0)
 
-							tweento(targetCFrame * offset * angle).Completed:Wait()
+							tweento(targetCFrame * maxDistanceOffset * maxDistanceAngle).Completed:Wait()
 
 							if model and model:FindFirstChild("Humanoid") then
 								while model.Humanoid.Health > 0 and options.tAutoBossMax.Value do
-									tpto(model.HumanoidRootPart.CFrame * offset * angle)
+									tpto(model.HumanoidRootPart.CFrame * maxDistanceOffset * maxDistanceAngle)
 									task.wait()
 								end
 							end
@@ -285,15 +284,12 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 					task.wait()
 				end
 
-				conn:Disconnect()
-				if antifall and antifall.Parent then
-					antifall:Destroy()
-				end
+				_conn:Disconnect()
+				antifall:Destroy()
 			end)
 		end
 	end
 })
-
 
 
 
