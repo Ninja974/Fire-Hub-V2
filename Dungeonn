@@ -224,10 +224,6 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
 	end    
 })
 
--- Fuera del task.spawn
-local antifall
-local _conn
-
 Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 	Title = "Auto Tp To Mobs (Max Distance)",
 	Description = "Farms mobs from max distance without getting close",
@@ -245,28 +241,57 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 			end
 
 			task.spawn(function()
-				_conn = RunService.Stepped:Connect(noclip)
-				antifall = Instance.new("BodyVelocity")
+				local antifall = Instance.new("BodyVelocity")
+				antifall.Name = "AntiFall"
 				antifall.Velocity = Vector3.new(0, 0, 0)
-				antifall.Parent = client.Character.HumanoidRootPart
+				antifall.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+				antifall.Parent = client.Character:WaitForChild("HumanoidRootPart")
+
+				local conn = RunService.Stepped:Connect(noclip)
 
 				while options.tAutoBossMax.Value do
 					for _, v in ipairs(workspace.Mobs:GetChildren()) do
-						-- mismo código de antes
+						local targetCFrame
+						local model = v:FindFirstChildWhichIsA("Model")
+
+						if model then
+							targetCFrame = model:GetModelCFrame()
+						else
+							local config = v:FindFirstChild("Npc_Configuration")
+							if config then
+								local spawnLoc = config:FindFirstChild("spawnlocaitonasd123")
+								if spawnLoc then
+									targetCFrame = CFrame.new(spawnLoc.Value)
+								end
+							end
+						end
+
+						if targetCFrame then
+							local offset = CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
+							local angle = CFrame.Angles(math.rad(-90), 0, 0)
+
+							tweento(targetCFrame * offset * angle).Completed:Wait()
+
+							if model and model:FindFirstChild("Humanoid") then
+								while model.Humanoid.Health > 0 and options.tAutoBossMax.Value do
+									tpto(model.HumanoidRootPart.CFrame * offset * angle)
+									task.wait()
+								end
+							end
+						end
 					end
 					task.wait()
 				end
 
-				-- Estas líneas ahora sí se ejecutan cuando el toggle se apaga
-				if _conn then _conn:Disconnect() end
-				if antifall then antifall:Destroy() end
+				conn:Disconnect()
+				if antifall and antifall.Parent then
+					antifall:Destroy()
+				end
 			end)
-		else
-			if _conn then _conn:Disconnect() end
-			if antifall then antifall:Destroy() end
 		end
 	end
 })
+
 
 
 
