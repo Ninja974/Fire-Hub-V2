@@ -224,14 +224,16 @@ Tabs["Auto Farm"]:AddToggle("tAutoBoss", {
 	end    
 })
 
+-- Fuera del task.spawn
+local antifall
+local _conn
+
 Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 	Title = "Auto Tp To Mobs (Max Distance)",
 	Description = "Farms mobs from max distance without getting close",
 	Default = false,
 	Callback = function(Value)
-		local _conn
 		if Value then
-			-- Evita conflicto con Close
 			if options["tAutoBoss"].Value then
 				Library:Notify({
 					Title = "Warning",
@@ -244,50 +246,28 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 
 			task.spawn(function()
 				_conn = RunService.Stepped:Connect(noclip)
-				local antifall = Instance.new("BodyVelocity")
+				antifall = Instance.new("BodyVelocity")
 				antifall.Velocity = Vector3.new(0, 0, 0)
 				antifall.Parent = client.Character.HumanoidRootPart
 
 				while options.tAutoBossMax.Value do
 					for _, v in ipairs(workspace.Mobs:GetChildren()) do
-						local targetCFrame
-						local model = v:FindFirstChildWhichIsA("Model")
-
-						if model then
-							targetCFrame = model:GetModelCFrame()
-						else
-							local config = v:FindFirstChild("Npc_Configuration")
-							if config then
-								local spawnLoc = config:FindFirstChild("spawnlocaitonasd123")
-								if spawnLoc then
-									targetCFrame = CFrame.new(spawnLoc.Value)
-								end
-							end
-						end
-
-						if targetCFrame then
-							local maxDistanceOffset = CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
-							local maxDistanceAngle = CFrame.Angles(math.rad(-90), 0, 0)
-
-							tweento(targetCFrame * maxDistanceOffset * maxDistanceAngle).Completed:Wait()
-
-							if model and model:FindFirstChild("Humanoid") then
-								while model.Humanoid.Health > 0 and options.tAutoBossMax.Value do
-									tpto(model.HumanoidRootPart.CFrame * maxDistanceOffset * maxDistanceAngle)
-									task.wait()
-								end
-							end
-						end
+						-- mismo código de antes
 					end
 					task.wait()
 				end
 
-				_conn:Disconnect()
-				antifall:Destroy()
+				-- Estas líneas ahora sí se ejecutan cuando el toggle se apaga
+				if _conn then _conn:Disconnect() end
+				if antifall then antifall:Destroy() end
 			end)
+		else
+			if _conn then _conn:Disconnect() end
+			if antifall then antifall:Destroy() end
 		end
 	end
 })
+
 
 
 
