@@ -1435,6 +1435,16 @@ Tabs["Buffs"]:AddToggle("tslayerheal", {
         end
     end
 })
+
+Tabs["Buffs"]:AddButton({
+    Title = "Get Semi Hybrid";
+    Callback = function()
+        game:GetService("ReplicatedStorage").Player_Data[game.Players.LocalPlayer.Name].Race.Value = 4
+    end
+})
+
+
+
 Tabs["Webhook Settings"]:AddInput("iWebhook", {
     Title = "Webhook",
     Default = nil,
@@ -1466,3 +1476,4 @@ Tabs["Settings"]:AddToggle("tAutoExec", {
 SaveManager:LoadAutoloadConfig()
 
 Window:SelectTab(1)
+
