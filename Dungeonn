@@ -246,8 +246,10 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 
 			task.spawn(function()
 				_conn = RunService.Stepped:Connect(noclip)
+
 				local antifall = Instance.new("BodyVelocity")
 				antifall.Velocity = Vector3.new(0, 0, 0)
+				antifall.MaxForce = Vector3.new(1e9, 1e9, 1e9)
 				antifall.Parent = client.Character.HumanoidRootPart
 
 				while options.tAutoBossMax.Value do
@@ -270,8 +272,23 @@ Tabs["Auto Farm"]:AddToggle("tAutoBossMax", {
 						if targetCFrame then
 							local maxDistanceOffset = CFrame.new(0, options["tAutoM1"].Value and 50 or 75, 0)
 							local maxDistanceAngle = CFrame.Angles(math.rad(-90), 0, 0)
+							local finalCFrame = targetCFrame * maxDistanceOffset * maxDistanceAngle
 
-							tweento(targetCFrame * maxDistanceOffset * maxDistanceAngle).Completed:Wait()
+							local tween = tweento(finalCFrame)
+							local start = tick()
+							tween.Completed:Wait()
+
+							-- failsafe por si queda colgado
+							task.delay(2, function()
+								if (tick() - start >= 1.5) and options.tAutoBossMax.Value then
+									local groundPos = Vector3.new(
+										client.Character.HumanoidRootPart.Position.X,
+										workspace.FallenPartsDestroyHeight + 10,
+										client.Character.HumanoidRootPart.Position.Z
+									)
+									client.Character.HumanoidRootPart.CFrame = CFrame.new(groundPos)
+								end
+							end)
 
 							if model and model:FindFirstChild("Humanoid") then
 								while model.Humanoid.Health > 0 and options.tAutoBossMax.Value do
