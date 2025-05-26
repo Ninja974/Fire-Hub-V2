@@ -492,6 +492,9 @@ Tabs["Kill Auras"]:AddToggle("tPiercingArrow", {
     end
 })
 
+local VIM = game:GetService("VirtualInputManager")
+local UserInputService = game:GetService("UserInputService")
+
 Tabs["Misc"]:AddToggle("tAntiAFK", {
     Title = "Anti-AFK (Global)",
     Default = true,
@@ -499,18 +502,27 @@ Tabs["Misc"]:AddToggle("tAntiAFK", {
         if Value then
             task.spawn(function()
                 while options.tAntiAFK.Value do
-                    local hrp = client.Character and client.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, 0.1)
-                        task.wait(1)
-                        hrp.CFrame = hrp.CFrame * CFrame.new(0, 0, -0.1)
-                    end
-                    task.wait(10)
+                    -- ⛹️ Simula salto
+                    VIM:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                    task.wait(0.05)
+                    VIM:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+
+                    -- 🎯 Gira un poquito la cámara (mouse deltas)
+                    VIM:SendMouseMoveEvent(math.random(-3, 3), math.random(-3, 3), false)
+
+                    -- 🖱️ Click derecho (M2)
+                    VIM:SendMouseButtonEvent(0, 1, true, game, 0)
+                    task.wait(0.1)
+                    VIM:SendMouseButtonEvent(0, 1, false, game, 0)
+
+                    -- 🕓 Espera random para parecer humano
+                    task.wait(math.random(25, 40))
                 end
             end)
         end
     end
 })
+
 -- BUFFS
 
 local skillMod = require(game:GetService("ReplicatedStorage").Modules.Server.Skills_Modules_Handler).Skills
