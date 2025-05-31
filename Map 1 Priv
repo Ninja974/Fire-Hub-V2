@@ -1739,4 +1739,3 @@ Tabs["Settings"]:AddToggle("tAutoExec", {
 SaveManager:LoadAutoloadConfig()
 
 Window:SelectTab(1)
-
