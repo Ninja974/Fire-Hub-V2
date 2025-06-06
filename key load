@@ -1,0 +1,66 @@
+local HttpService = game:GetService("HttpService")
+local PlaceId = game.PlaceId
+
+local mapScripts = {
+    [11468034852] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Mugen",
+    [11468075071] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Dungeon",
+    [13883059853] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%202%20Priv",
+    [13883279773] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%201%20Priv",
+    [17387475546] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%201%20Public",
+    [17387482786] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%202%20Public"
+}
+
+-- UI to validate key first
+local Library = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Window = Library:CreateWindow({ Title = "Fire Hub 🔥", SubTitle = "Key Required", TabWidth = 120, Size = UDim2.fromOffset(370, 230), Acrylic = true, Theme = "Dark", Center = true, IsResizable = false })
+local Tabs = { Main = Window:AddTab({ Title = "Key", Icon = "🔑" }) }
+
+local KeyInput = ""
+Tabs.Main:AddInput("KeyBox", {
+    Title = "Enter Key",
+    Default = "",
+    Placeholder = "Paste key here...",
+    Callback = function(value)
+        KeyInput = value
+    end,
+})
+
+Tabs.Main:AddButton({
+    Title = "✅ Submit Key",
+    Callback = function()
+        local apiUrl = "http://51.75.118.75:20256/validate?key=" .. KeyInput
+
+        local success, response = pcall(function()
+            return game:HttpGet(apiUrl)
+        end)
+
+        if not success then
+            return Library:Notify({ Title = "❌ Error", Content = "Can't contact server.", Duration = 4 })
+        end
+
+        local result = HttpService:JSONDecode(response)
+        if result.valid then
+            Library:Notify({ Title = "✔ Access Granted", Content = "Key valid. Loading...", Duration = 3 })
+            task.wait(1)
+            Library:Unload()
+
+            -- 🔁 Load the correct map script after valid key
+            local scriptUrl = mapScripts[PlaceId]
+            if scriptUrl then
+                local success2, scriptCode = pcall(function()
+                    return game:HttpGet(scriptUrl .. "?v=" .. tostring(math.random(1000, 9999)))
+                end)
+
+                if success2 and scriptCode then
+                    loadstring(scriptCode)()
+                else
+                    warn("❌ Failed to load map script for PlaceId: " .. PlaceId)
+                end
+            else
+                warn("❌ No script found for this PlaceId!")
+            end
+        else
+            Library:Notify({ Title = "❌ Invalid Key", Content = result.reason or "Access denied", Duration = 4 })
+        end
+    end
+})
