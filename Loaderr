@@ -1,0 +1,61 @@
+local executor = identifyexecutor()
+local HttpService = game:GetService("HttpService")
+local GuiService = game:GetService("GuiService")
+local TeleportService = game:GetService("TeleportService")
+local client = game.Players.LocalPlayer
+
+-- Reintento si el juego crashea
+GuiService.ErrorMessageChanged:Connect(function()
+    TeleportService:Teleport(game.PlaceId, client)
+end)
+
+-- Executors que necesitan fix (Xeno, Solara)
+local fixeable = {
+    "Xeno",
+    "Solara"
+}
+
+if table.find(fixeable, executor) then
+    getgenv().require = function(obj)
+        local success, result = pcall(function()
+            return loadstring(decompile(obj))()
+        end)
+        if success then
+            return result
+        else
+            -- fallback: intenta cargar desde GitHub como módulo
+            local path = obj:GetFullName():gsub(" ", "%%20")
+            local url = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/main/" .. path .. ".lua"
+            return loadstring(game:HttpGet(url))()
+        end
+    end
+end
+
+-- Mapa a script
+local mapScripts = {
+    [11468034852] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Mugen", -- Mugen
+    [11468075017] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Dungeonn", -- Ouwighara
+    [13883059853] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%202%20Priv", -- Map 2 Private
+    [13883279773] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%201%20Priv", -- Map 1 Private
+    [17387475546] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%201%20Public", -- Map 1 Public
+    [17387482786] = "https://raw.githubusercontent.com/Ninja974/Fire-Hub-V2/refs/heads/main/Map%202%20Public" -- Map 2 Public
+}
+
+-- Cargar el script correcto
+local currentPlaceId = game.PlaceId
+local scriptUrl = mapScripts[currentPlaceId]
+
+if scriptUrl then
+    print("Loading script for PlaceId: " .. currentPlaceId)
+    local success, result = pcall(function()
+        return game:HttpGet(scriptUrl .. "?v=" .. tostring(math.random(1000, 9999)), true)
+    end)
+
+    if success and result then
+        loadstring(result)()
+    else
+        warn("❌ Failed to load script for PlaceId: " .. currentPlaceId)
+    end
+else
+    warn("⚠️ No script found for this PlaceId!")
+end
